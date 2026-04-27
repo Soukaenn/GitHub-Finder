@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Finder</title>
+    <link rel="stylesheet" href="git.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar"> 
+        <div class="logo">
+            <img src="logo.png" alt="logo">
+            <span>GitHub Finder</span>
+        </div>
+        <button class="btn-bookmarks">
+            Bookmarks <span class="badge">0</span>
+        </button>
+    </nav>
+
+    <main class="container">
+        
+        <!-- SEARCH -->
+        <section class="search-section">
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Rechercher un utilisateur sur GitHub Finder">
+                <button id="search-btn" class="btn-search">Chercher</button>
+            </div>
+        </section>
+
+        <!-- HERO -->
+        <section id="hero-section" class="hero-section">
+            <div class="search-icon">🔍</div>
+            <h1>Trouver des Utilisateurs GitHub</h1>
+            <p>Recherchez n'importe quel nom d'utilisateur pour commencer</p>
+        </section>
+
+        <!-- MESSAGES -->
+        <section id="message-section" class="messages hidden">
+
+          <div id="msg-welcome" class="message message--welcome">
+            <p>Cherche un utilisateur GitHub pour commencer</p>
+          </div>
+
+          <div id="msg-loading" class="message message--loading hidden">
+            <div class="spinner"></div>
+            <p>Chargement...</p>
+          </div>
+
+          <div id="msg-error" class="message message--error hidden">
+            <p id="error-text">Utilisateur introuvable.</p>
+          </div>
+
+        </section>
+
+        <!-- PROFILE -->
+        <section id="profile-section" class="profile-card hidden">
+            <div class="profile-card__left">
+                <img id="profile-avatar" src="" alt="Avatar" class="profile-card__avatar">
+                <button id="btn-bookmark" class="btn btn--star">Ajouter aux favoris</button>
+            </div>
+
+            <div class="profile-card__right">
+                <h2 id="profile-name" class="profile-card__name">Nom</h2>
+                <p id="profile-login" class="profile-card__login">@login</p>
+                <p id="profile-bio" class="profile-card__bio"></p>
+
+                <div class="profile-card__stats">
+                    <div class="stat">
+                        <span id="profile-followers" class="stat__value">0</span>
+                        <span class="stat__label">Followers</span>
+                    </div>
+                    <div class="stat">
+                        <span id="profile-repos" class="stat__value">0</span>
+                        <span class="stat__label">Repos</span>
+                    </div>
+                </div>
+
+                <a id="profile-link" href="#" target="_blank" class="btn btn--outline">
+                    Voir sur GitHub ↗
+                </a>
+            </div>
+        </section>
+
+        <!-- BOOKMARKS -->
+        <section id="bookmarks-section" class="bookmarks-list">
+            <h3>📚 Utilisateurs Favoris</h3>
+            <p class="empty-msg">Aucun favoris pour le moment</p>
+        </section>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

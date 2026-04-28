@@ -8,10 +8,9 @@
 </head>
 <body>
 
-    <!-- NAVBAR -->
     <nav class="navbar"> 
         <div class="logo">
-            <img src="logo.png" alt="logo">
+            <img src="img/logo.png" alt="logo">
             <span>GitHub Finder</span>
         </div>
         <button class="btn-bookmarks">
@@ -21,22 +20,19 @@
 
     <main class="container">
         
-        <!-- SEARCH -->
         <section class="search-section">
             <div class="search-bar">
                 <input type="text" id="search-input" placeholder="Rechercher un utilisateur sur GitHub Finder">
                 <button id="search-btn" class="btn-search">Chercher</button>
             </div>
         </section>
-
-        <!-- HERO -->
+    
         <section id="hero-section" class="hero-section">
             <div class="search-icon">🔍</div>
             <h1>Trouver des Utilisateurs GitHub</h1>
             <p>Recherchez n'importe quel nom d'utilisateur pour commencer</p>
         </section>
-
-        <!-- MESSAGES -->
+ 
         <section id="message-section" class="messages hidden">
 
           <div id="msg-welcome" class="message message--welcome">
@@ -53,8 +49,7 @@
           </div>
 
         </section>
-
-        <!-- PROFILE -->
+  
         <section id="profile-section" class="profile-card hidden">
             <div class="profile-card__left">
                 <img id="profile-avatar" src="" alt="Avatar" class="profile-card__avatar">
@@ -82,15 +77,13 @@
                 </a>
             </div>
         </section>
-
-        <!-- BOOKMARKS -->
+   
         <section id="bookmarks-section" class="bookmarks-list">
             <h3>📚 Utilisateurs Favoris</h3>
             <p class="empty-msg">Aucun favoris pour le moment</p>
         </section>
 
     </main>
-
-    <script src="app.js"></script>
+    <script src="git.js"></script>
 </body>
 </html>

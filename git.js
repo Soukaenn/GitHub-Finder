@@ -1,4 +1,5 @@
 
+
 const input = document.getElementById("search-input");
 const btn = document.getElementById("search-btn");
 
@@ -8,6 +9,7 @@ const msgSection = document.getElementById("message-section");
 const msgWelcome = document.getElementById("msg-welcome");
 const msgLoading = document.getElementById("msg-loading");
 const msgError = document.getElementById("msg-error");
+const errorText = document.getElementById("error-text");
 
 const profileSection = document.getElementById("profile-section");
 
@@ -18,208 +20,212 @@ const bioEl = document.getElementById("profile-bio");
 const followersEl = document.getElementById("profile-followers");
 const reposEl = document.getElementById("profile-repos");
 const profileLink = document.getElementById("profile-link");
+
 const bookmarkBtn = document.getElementById("btn-bookmark");
 
 const bookmarksSection = document.getElementById("bookmarks-section");
-const bookmarksBadge = document.querySelector(".badge");
-const bookmarksBtn = document.querySelector(".btn-bookmarks");
+const badge = document.querySelector(".badge");
+
+const bookmarksToggleBtn = document.querySelector(".btn-bookmarks");
 
 
+const state = {
+    currentUser: null,
+    bookmarks: JSON.parse(localStorage.getItem("bookmarks")) || [],
+    isViewingBookmarks: false
+};
 
-let bookmarks = JSON.parse(localStorage.getItem("bookmarks")) || [];
-let bookmarksVisible = false;
 
-updateBookmarksUI();
-
+function init() {
+    bookmarksSection.style.display = "none";
+    msgSection.classList.remove("hidden");
+    msgWelcome.classList.remove("hidden");
+    updateNavButton();
+    updateBookmarksUI();
+}
+init();
 
 
 async function fetchUser(username) {
     const res = await fetch(`https://api.github.com/users/${username}`);
+
+    if (res.status === 404) {
+        throw new Error(`Utilisateur "${username}" introuvable`);
+    }
+
+    if (res.status === 403) {
+        throw new Error("Limite API GitHub atteinte.");
+    }
+
+    if (!res.ok) {
+        throw new Error("Une erreur inattendue s'est produite.");
+    }
+
     return await res.json();
 }
 
 
-// ============================
-// SEARCH
-// ============================
-btn.addEventListener("click", searchUser);
+btn.addEventListener("click", handleSearch);
 
-async function searchUser() {
+input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") handleSearch();
+});
+
+async function handleSearch() {
     const username = input.value.trim();
     if (!username) return;
 
-    hero.classList.add("hidden");
-    hideProfile();
-    showMessage("loading");
+    try {
+        showLoading();
 
-    const data = await fetchUser(username);
+        const user = await fetchUser(username);
 
-    if (data.message === "Not Found") {
-        showMessage("error", "Utilisateur introuvable !");
-        return;
+        state.currentUser = user;
+        state.isViewingBookmarks = false;
+
+        displayProfile(user);
+        updateNavButton();
+
+    } catch (err) {
+        showError(err.message);
     }
-
-    hideMessages();
-    fillProfile(data);
-    showProfile();
 }
 
+function displayProfile(user) {
+    hero.classList.add("hidden");
+    msgSection.classList.add("hidden");
+    profileSection.classList.remove("hidden");
 
-// ============================
-// PROFILE
-// ============================
-function fillProfile(data) {
-    avatar.src = data.avatar_url;
-    nameEl.textContent = data.name || "No name";
-    loginEl.textContent = "@" + data.login;
-    bioEl.textContent = data.bio || "No bio";
-    followersEl.textContent = data.followers;
-    reposEl.textContent = data.public_repos;
-    profileLink.href = data.html_url;
+    avatar.src = user.avatar_url;
+    nameEl.textContent = user.name || "Nom non renseigné";
+    loginEl.textContent = "@" + user.login;
+    bioEl.textContent = user.bio || "Aucune bio disponible.";
+    followersEl.textContent = user.followers;
+    reposEl.textContent = user.public_repos;
+    profileLink.href = user.html_url;
 
-    bookmarkBtn.onclick = function () {
-        addBookmark(data.login, data.avatar_url);
+    const isBookmarked = state.bookmarks.some(b => b.id === user.id);
+    updateBookmarkButton(isBookmarked);
 
-        this.textContent = "Ajouté ✓";
-        this.disabled = true;
+    bookmarkBtn.onclick = () => {
+        const exists = state.bookmarks.some(b => b.id === user.id);
 
-        setTimeout(() => {
-            this.textContent = "Ajouter aux favoris";
-            this.disabled = false;
-        }, 1500);
+        if (exists) {
+            removeBookmark(user.id);
+            updateBookmarkButton(false);
+        } else {
+            addBookmark(user);
+            updateBookmarkButton(true);
+        }
     };
 }
 
+function updateBookmarkButton(isActive) {
+    bookmarkBtn.textContent = isActive
+        ? "✓ Dans les favoris"
+        : "Ajouter aux favoris";
 
-// ============================
-// ADD BOOKMARK
-// ============================
-function addBookmark(username, avatarUrl) {
-    if (bookmarks.some(b => b.username === username)) return;
-
-    bookmarks.push({ username, avatarUrl });
-
-    localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
-
-    updateBookmarksUI();
+    bookmarkBtn.classList.toggle("active", isActive);
 }
 
+function addBookmark(user) {
+    if (state.bookmarks.some(b => b.id === user.id)) return;
 
-// ============================
-// REMOVE BOOKMARK
-// ============================
-function removeBookmark(username) {
-    bookmarks = bookmarks.filter(b => b.username !== username);
+    state.bookmarks.push({
+        id: user.id,
+        login: user.login,
+        avatar: user.avatar_url
+    });
 
-    localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
-
-    updateBookmarksUI();
+    saveBookmarks();
 }
 
+function removeBookmark(id) {
+    state.bookmarks = state.bookmarks.filter(b => b.id !== id);
+    saveBookmarks();
 
-// ============================
-// TOGGLE BOOKMARKS
-// ============================
-bookmarksBtn.addEventListener("click", toggleBookmarks);
-
-function toggleBookmarks() {
-    bookmarksVisible = !bookmarksVisible;
-
-    if (bookmarksVisible) {
-        bookmarksSection.classList.remove("hidden");
-    } else {
-        bookmarksSection.classList.add("hidden");
+    if (state.currentUser?.id === id) {
+        updateBookmarkButton(false);
     }
 }
 
+function saveBookmarks() {
+    localStorage.setItem("bookmarks", JSON.stringify(state.bookmarks));
+    updateBookmarksUI();
+    updateNavButton();
+}
 
-// ============================
-// UPDATE UI
-// ============================
+
+function updateNavButton() {
+    const label = state.isViewingBookmarks ? "← Retour" : "Favoris";
+
+    bookmarksToggleBtn.innerHTML = `
+        ${label} <span class="badge">${state.bookmarks.length}</span>
+    `;
+}
+
+bookmarksToggleBtn.addEventListener("click", () => {
+    state.isViewingBookmarks = !state.isViewingBookmarks;
+
+    bookmarksSection.style.display = state.isViewingBookmarks ? "block" : "none";
+
+    hero.classList.toggle("hidden", state.isViewingBookmarks);
+    msgSection.classList.add("hidden");
+    profileSection.classList.add("hidden");
+
+    if (!state.isViewingBookmarks && state.currentUser) {
+        displayProfile(state.currentUser);
+    }
+
+    updateNavButton();
+});
+
 function updateBookmarksUI() {
-    const emptyMsg = bookmarksSection.querySelector(".empty-msg");
-
-    bookmarksBadge.textContent = bookmarks.length;
+    badge.textContent = state.bookmarks.length;
 
     document.querySelectorAll(".bm-item").forEach(el => el.remove());
 
-    if (bookmarks.length === 0) {
-        emptyMsg.style.display = "block";
-        return;
-    }
+    state.bookmarks.forEach(bm => {
+        const div = document.createElement("div");
+        div.className = "bm-item";
 
-    emptyMsg.style.display = "none";
-
-    bookmarks.forEach(bm => {
-        const item = document.createElement("div");
-        item.className = "bm-item";
-
-        item.style = `
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:10px;
-            margin-bottom:10px;
-            background:#1e293b;
-            border:1px solid #334155;
-            border-radius:10px;
+        div.innerHTML = `
+            <div class="bm-load">
+                <img src="${bm.avatar}" width="40">
+                <strong>@${bm.login}</strong>
+            </div>
+            <button class="bm-remove">Retirer❌</button>
         `;
 
-        item.innerHTML = `
-            <div style="display:flex;align-items:center;gap:10px;">
-                <img src="${bm.avatarUrl}" width="40" style="border-radius:50%">
-                <strong>@${bm.username}</strong>
-            </div>
+        div.querySelector(".bm-load").addEventListener("click", () => {
+            input.value = bm.login;
+            state.isViewingBookmarks = false;
+            bookmarksSection.style.display = "none";
+            handleSearch();
+        });
 
-            <div>
-                <a href="https://github.com/${bm.username}" target="_blank" style="color:#38bdf8; margin-right:10px;">
-                    Voir ↗
-                </a>
+        div.querySelector(".bm-remove").addEventListener("click", (e) => {
+            e.stopPropagation();
+            removeBookmark(bm.id);
+        });
 
-                <button onclick="removeBookmark('${bm.username}')">
-                    ❌
-                </button>
-            </div>
-        `;
-
-        bookmarksSection.appendChild(item);
+        bookmarksSection.appendChild(div);
     });
 }
 
-
-// ============================
-// UI HELPERS
-// ============================
-function showMessage(type, text = "") {
-    msgWelcome.classList.add("hidden");
-    msgLoading.classList.add("hidden");
-    msgError.classList.add("hidden");
-
-    if (type === "loading") {
-        msgSection.classList.remove("hidden");
-        msgLoading.classList.remove("hidden");
-    }
-
-    if (type === "error") {
-        msgSection.classList.remove("hidden");
-        document.getElementById("error-text").textContent = text;
-        msgError.classList.remove("hidden");
-    }
-
-    if (type === "welcome") {
-        msgSection.classList.remove("hidden");
-        msgWelcome.classList.remove("hidden");
-    }
-}
-
-function hideMessages() {
-    msgSection.classList.add("hidden");
-}
-
-function showProfile() {
-    profileSection.classList.remove("hidden");
-}
-
-function hideProfile() {
+function showLoading() {
+    hero.classList.add("hidden");
     profileSection.classList.add("hidden");
+
+    msgSection.classList.remove("hidden");
+    msgLoading.classList.remove("hidden");
+    msgError.classList.add("hidden");
+}
+
+function showError(message) {
+    msgSection.classList.remove("hidden");
+    msgError.classList.remove("hidden");
+    errorText.textContent = message;
+
+    msgLoading.classList.add("hidden");
 }

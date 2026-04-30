@@ -59,26 +59,48 @@ body {
     color: var(--accent);
 }
 
-.btn-bookmarks {
+/* ===================== */
+/* FAVORIS BUTTON */
+/* ===================== */
+
+.btn-favoris {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
     background-color: #6366f1;
     color: white;
+
     border: none;
-    padding: 8px 16px;
+    padding: 8px 14px;
     border-radius: 8px;
+
     cursor: pointer;
     font-weight: 600;
-    transition: 0.3s;
+    font-size: 0.95rem;
+
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
-.btn-bookmarks:hover {
+.btn-favoris:hover {
     background-color: #4f46e5;
+    transform: translateY(-2px);
 }
 
-.badge {
-    background: var(--bg-secondary);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.8rem;
+.btn-favoris:active {
+    transform: scale(0.95);
+}
+
+.btn-favoris .badge {
+    background: #0f172a;
+    color: #fff;
+
+    padding: 2px 7px;
+    border-radius: 6px;
+
+    font-size: 0.75rem;
+    font-weight: bold;
 }
 
 

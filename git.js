@@ -1,5 +1,3 @@
-
-
 const input = document.getElementById("search-input");
 const btn = document.getElementById("search-btn");
 
@@ -22,7 +20,6 @@ const reposEl = document.getElementById("profile-repos");
 const profileLink = document.getElementById("profile-link");
 
 const bookmarkBtn = document.getElementById("btn-bookmark");
-
 const bookmarksSection = document.getElementById("bookmarks-section");
 const badge = document.querySelector(".badge");
 
@@ -52,7 +49,6 @@ async function fetchUser(username) {
     if (res.status === 404) {
         throw new Error(`Utilisateur "${username}" introuvable`);
     }
-
     if (res.status === 403) {
         throw new Error("Limite API GitHub atteinte.");
     }
@@ -70,6 +66,7 @@ btn.addEventListener("click", handleSearch);
 input.addEventListener("keypress", (e) => {
     if (e.key === "Enter") handleSearch();
 });
+
 
 async function handleSearch() {
     const username = input.value.trim();
@@ -90,6 +87,7 @@ async function handleSearch() {
         showError(err.message);
     }
 }
+
 
 function displayProfile(user) {
     hero.classList.add("hidden");
@@ -120,6 +118,7 @@ function displayProfile(user) {
     };
 }
 
+
 function updateBookmarkButton(isActive) {
     bookmarkBtn.textContent = isActive
         ? "✓ Dans les favoris"
@@ -127,6 +126,7 @@ function updateBookmarkButton(isActive) {
 
     bookmarkBtn.classList.toggle("active", isActive);
 }
+
 
 function addBookmark(user) {
     if (state.bookmarks.some(b => b.id === user.id)) return;
@@ -140,6 +140,7 @@ function addBookmark(user) {
     saveBookmarks();
 }
 
+
 function removeBookmark(id) {
     state.bookmarks = state.bookmarks.filter(b => b.id !== id);
     saveBookmarks();
@@ -148,6 +149,7 @@ function removeBookmark(id) {
         updateBookmarkButton(false);
     }
 }
+
 
 function saveBookmarks() {
     localStorage.setItem("bookmarks", JSON.stringify(state.bookmarks));
@@ -164,6 +166,7 @@ function updateNavButton() {
     `;
 }
 
+
 bookmarksToggleBtn.addEventListener("click", () => {
     state.isViewingBookmarks = !state.isViewingBookmarks;
 
@@ -179,6 +182,7 @@ bookmarksToggleBtn.addEventListener("click", () => {
 
     updateNavButton();
 });
+
 
 function updateBookmarksUI() {
     badge.textContent = state.bookmarks.length;
@@ -213,6 +217,7 @@ function updateBookmarksUI() {
     });
 }
 
+
 function showLoading() {
     hero.classList.add("hidden");
     profileSection.classList.add("hidden");
@@ -221,6 +226,7 @@ function showLoading() {
     msgLoading.classList.remove("hidden");
     msgError.classList.add("hidden");
 }
+
 
 function showError(message) {
     msgSection.classList.remove("hidden");
